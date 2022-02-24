@@ -1,6 +1,7 @@
 package io.muenchendigital.digiwf.json.serialization;
 
 
+import io.muenchendigital.digiwf.json.serialization.serializer.JsonSchemaSerializer;
 import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,13 +14,13 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SerializationServiceTest {
+public class JsonSchemaSerializationServiceTest {
 
-    private SerializationService serializationService;
+    private JsonSchemaSerializationService jsonSchemaSerializationService;
 
     @BeforeEach
     private void setUp() {
-        this.serializationService = new SerializationService();
+        this.jsonSchemaSerializationService = new JsonSchemaSerializationService(new JsonSchemaSerializer());
     }
 
     @Test
@@ -33,7 +34,7 @@ public class SerializationServiceTest {
 
         final Map<String, Object> previousData = Map.of();
 
-        final Map<String, Object> serializedData = this.serializationService.serializeData(rawSchema, data, previousData);
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, previousData);
 
         Assertions.assertThat(serializedData).isEqualTo(Map.of(
                 "stringProp1", "stringValue"
@@ -52,7 +53,7 @@ public class SerializationServiceTest {
                 "dateprop", "20"
         );
 
-        final Map<String, Object> serializedData = this.serializationService.serializeData(rawSchema, data, previousData);
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, previousData);
         final Map<String, Object> validData = new HashMap<>();
 
         validData.put("stringProp1", "fsdafsda");
@@ -77,7 +78,7 @@ public class SerializationServiceTest {
                 "stringProp2", "100"
         );
 
-        final Map<String, Object> serializedData = this.serializationService.serializeData(rawSchema, data, previousData);
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, previousData);
 
         final Map<String, Object> validData = new HashMap<>();
 
@@ -107,7 +108,7 @@ public class SerializationServiceTest {
                 "numberProp1", 100
         );
 
-        final Map<String, Object> serializedData = this.serializationService.serializeData(rawSchema, data, previousData);
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, previousData);
 
         Assertions.assertThat(serializedData).isEqualTo(Map.of(
                 "textarea1", "textAreaValue",
@@ -137,7 +138,7 @@ public class SerializationServiceTest {
                 "numberProp1", 100
         );
 
-        final Map<String, Object> serializedData = this.serializationService.serializeData(rawSchema, data, previousData);
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, previousData);
 
         final Map<String, Object> erg = Map.of(
                 "textarea1", "textAreaValue",
@@ -163,7 +164,7 @@ public class SerializationServiceTest {
 
         final Map<String, Object> previousData = Map.of();
 
-        final Map<String, Object> serializedData = this.serializationService.serializeData(rawSchema, data, previousData);
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, previousData);
 
         Assertions.assertThat(serializedData).isEqualTo(Map.of(
                 "FormField_Grusstext", "meinValue"
@@ -182,7 +183,7 @@ public class SerializationServiceTest {
         );
 
         final String rawSchema = this.getSchemaString("/schema/validation/complexObjectSchema.json");
-        final Map<String, Object> serializedData = this.serializationService.serializeData(rawSchema, data, Map.of());
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, Map.of());
 
         final Map<String, Object> erg = Map.of(
                 "textarea", "100",
