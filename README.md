@@ -74,9 +74,83 @@ This project is built with:
 <!-- GETTING STARTED -->
 ## Getting Started
 
+_Below is an example of how you can installing and setup up your service_
+
+1. Use the spring initalizer and create a Spring Boot application with `Spring Web`
+   dependencies [https://start.spring.io](https://start.spring.io)
+2. Add the digiwf-json-serialization dependency
+
+With Maven:
+
+```
+   <dependency>
+        <groupId>io.muenchendigital.digiwf</groupId>
+        <artifactId>digiwf-json-serialization-starter</artifactId>
+        <version>${digiwf.version}</version>
+   </dependency>
+```
+
+With Gradle:
+
+```
+implementation group: 'io.muenchendigital.digiwf', name: 'digiwf-json-serialization-starter', version: '${digiwf.version}'
+```
+
+3. Inject the `JsonSchemaSerializationService` in your application
+
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+
+The library has several functionalities that can be configured. We have provided examples that show how you can use
+them.
+
+_For more examples, please refer to the [Examples](example) folder_
+
+First inject the `JsonSchemaSerializationService` in your class. The `JsonSchemaSerializationService` is a 
+wrapper around a serializer instance which provides serialize and deserialize methods. 
+
+```java
+@RequiredArgsConstructor
+public class YourClass {
+    // inject JsonSchemaSerializationService
+    private final JsonSchemaSerializationService jsonSchemaSerializationService;
+}
+```
+
+Then you can call `jsonSchemaSerializationService.serialize(schema, data, previousData)` to serialize your data based on
+the json schema you are providing.
+To deserialize data you can call `jsonSchemaSerializationService.deserialize(schema, data)`.
+
+### Create a custom serializer
+
+If you want to use a custom serializer create a serializer which implements the `JsonSchemaBaseSerializer` 
+and create a bean that provides your custom serializer in the configuration.
+Then your custom serializer is used in the `JsonSchemaSerializationService` instead of the default one.
+
+```java
+public class MyCustomJsonSchemaSerializer implements JsonSchemaBaseSerializer {
+   @Override
+   public Map<String, Object> serialize(Schema schema, JSONObject data, JSONObject previousData) {
+      return null;
+   }
+
+   @Override
+   public Map<String, Object> deserialize(Schema schema, Map<String, Object> data) {
+      return null;
+   }
+}
+```
+
+```java
+@Configuration
+public class MyJsonSerializationAutoConfiguration {
+   @Bean
+   public JsonSchemaBaseSerializer customJsonSchemaSerializer() {
+      return new MyCustomJsonSchemaSerializer();
+   }    
+}
+```
 
 
 <!-- CONTRIBUTING -->

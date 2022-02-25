@@ -13,6 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
+/**
+ * Demo Controller which serializes and deserializes json schema data
+ */
 @RequiredArgsConstructor
 @RestController
 public class SerializationController {
