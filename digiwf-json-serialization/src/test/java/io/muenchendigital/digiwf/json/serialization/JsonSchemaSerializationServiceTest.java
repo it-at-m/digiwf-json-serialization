@@ -88,8 +88,6 @@ public class JsonSchemaSerializationServiceTest {
 
         //override all
         Assertions.assertThat(serializedData).isEqualTo(validData);
-
-        Assertions.assertThat(serializedData).isEqualTo(validData);
     }
 
     @Test
