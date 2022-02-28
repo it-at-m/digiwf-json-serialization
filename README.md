@@ -58,6 +58,14 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+DigiWF JSON Serialization serializes and deserializes data based on json schemas.
+
+**Features**
+
+* **Serialize:** The serialize function creates a json object based on the json schema and the data you provide (current and previous data). The current data is used if the property is not readonly or null. Otherwise, the previous data is added to data in the serialization process.
+* **Deserialize:** The deserialize functionality takes a json object and returns the relevant parts of it based on the json schema.
+
+At the moment only JSON schema [Draft v7](https://json-schema.org/draft-07/json-schema-release-notes.html) is supported.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -67,6 +75,7 @@
 This project is built with:
 
 * [Spring Boot](https://spring.io/projects/spring-boot)
+* [everit-json-schema](https://github.com/everit-org/json-schema)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -118,7 +127,7 @@ public class YourClass {
 }
 ```
 
-Then you can call `jsonSchemaSerializationService.serialize(schema, data, previousData)` to serialize your data based on
+Then you can call `jsonSchemaSerializationService.serialize(schema, data, previousData)` to serialize data based on
 the json schema you are providing.
 To deserialize data you can call `jsonSchemaSerializationService.deserialize(schema, data)`.
 

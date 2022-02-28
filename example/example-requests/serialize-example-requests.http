@@ -15,7 +15,24 @@ Content-Type: application/json
   }
 }
 
-### serialize data
+### serialize with readonly property
+
+POST http://localhost:8080/serialize
+Content-Type: application/json
+
+{
+  "schema": "/schema/serialization/simpleSchema.json",
+  "data": {
+    "stringProp1": "stringValue",
+    "numberProp1": "12"
+  },
+  "previousData": {
+    "stringProp1": "stringValue",
+    "numberProp1": "7"
+  }
+}
+
+### serialize data with previous
 
 POST http://localhost:8080/serialize
 Content-Type: application/json
