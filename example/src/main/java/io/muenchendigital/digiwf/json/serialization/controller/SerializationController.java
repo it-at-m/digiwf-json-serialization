@@ -35,15 +35,6 @@ public class SerializationController {
         return jsonSchemaSerializationService.deserializeData(rawSchema, body.getData());
     }
 
-    /**
-     * Helper Function
-     * Loads the json schema from resources folder
-     *
-     * @param path
-     * @return
-     * @throws IOException
-     * @throws URISyntaxException
-     */
     private String getSchemaString(final String path) throws IOException, URISyntaxException {
         return new String(Files.readAllBytes(Paths.get(this.getClass().getResource(path).toURI())));
     }
