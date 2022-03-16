@@ -71,23 +71,30 @@ public class JsonSchemaValidator {
         return false;
     }
 
+    /**
+     * @param schema   Schema to search for the property
+     * @param property property
+     * @return
+     */
     public boolean isReadOnlyProperty(final Schema schema, final String property) {
         if (schema instanceof ObjectSchema) {
             return this.isReadOnlyProperty((ObjectSchema) schema, property);
         }
 
         if (schema instanceof CombinedSchema) {
+            //TODO not possible to set CombinedSchemas readOnly right now
             final CombinedSchema combinedSchema = (CombinedSchema) schema;
-
             return combinedSchema.getSubschemas().stream().anyMatch(obj -> this.isReadOnlyProperty(obj, property));
         }
+
+        //TODO Conditional Schema
+
         return false;
     }
 
     //------------------------------------- helper methods -------------------------------------//
 
-
-    public boolean isReadOnlyProperty(final ObjectSchema schema, String field) {
+    private boolean isReadOnlyProperty(final ObjectSchema schema, String field) {
         field = field.replaceFirst("^#", "").replaceFirst("^/", "");
         final int firstSlashIdx = field.indexOf('/');
         final String nextToken;
@@ -102,17 +109,16 @@ public class JsonSchemaValidator {
         return !field.isEmpty() && this.isReadOnlyProperty(schema, nextToken, remaining);
     }
 
-
     private boolean isReadOnlyProperty(final ObjectSchema schema, String current, final String remaining) {
         current = this.unescape(current);
         final boolean hasSuffix = !(remaining == null);
         if (schema.getPropertySchemas().containsKey(current)) {
             if (schema.isReadOnly() != null && schema.isReadOnly()) {
                 return true;
-            } else if (schema.getPropertySchemas().get(current).isReadOnly() != null && schema.getPropertySchemas().get(current).isReadOnly()) {
-                return true;
             } else if (hasSuffix) {
                 return this.isReadOnlyProperty(schema.getPropertySchemas().get(current), remaining);
+            } else if (schema.getPropertySchemas().get(current).isReadOnly() != null && schema.getPropertySchemas().get(current).isReadOnly()) {
+                return true;
             }
         }
         return schema.isReadOnly() != null && schema.isReadOnly();
@@ -123,7 +129,6 @@ public class JsonSchemaValidator {
                 .replace("\\\"", "\"")
                 .replace("\\\\", "\\");
     }
-
 
     private void validate(final Map<String, Object> schemaObject, final JSONObject data) {
         final Schema schema = this.createSchema(new JSONObject(schemaObject));

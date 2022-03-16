@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * JsonSchemaSerializer is an implementation of the JsonSchemaBaseSerializer that provides functionality
  * to serialize and deserialize data based on a json schema.
  */
-public class JsonSchemaSerializerImpl implements JsonSchemaSerializer {
+public class JsonSerializerImpl implements JsonSerializer {
 
     /**
      * Serialize data based on the schema.
@@ -97,6 +97,49 @@ public class JsonSchemaSerializerImpl implements JsonSchemaSerializer {
         }
 
         return Collections.emptyList();
+    }
+
+    /**
+     * Extract a property from a json object
+     *
+     * @param data     data to extract value from
+     * @param property path to property
+     * @return property
+     */
+    @Override
+    public Object extractValue(final JSONObject data, final String property) {
+        return null;
+    }
+
+    /**
+     * @param data     data to inser
+     * @param property path to property
+     */
+    @Override
+    public void inserValue(final JSONObject data, final String property, final Object value) {
+
+        //go through data until nothing left
+
+
+        //add or override value
+
+
+//        if (schema instanceof ObjectSchema) {
+//            return this.serializeObject(((ObjectSchema) schema).getPropertySchemas(), data, previousData);
+//        }
+//
+//        // combined schemas are saved on the next higher object schema level -> search for the next object schema
+//        // therefore iterate all sub schemas of the schema and serialize the data for every schema
+//        // by calling serialize(...) recursively
+//        if (schema instanceof CombinedSchema) {
+//            final CombinedSchema combinedSchema = (CombinedSchema) schema;
+//            return combinedSchema.getSubschemas().stream()
+//                    .map(subSchema -> this.serialize(subSchema, data, previousData))
+//                    .flatMap(m -> m.entrySet().stream())
+//                    .collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
+//        }
+//
+//        return Collections.emptyMap();
     }
 
     //--------------------------------------------------- helper methods ---------------------------------------------------//

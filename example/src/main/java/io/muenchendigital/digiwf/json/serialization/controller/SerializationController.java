@@ -1,6 +1,6 @@
 package io.muenchendigital.digiwf.json.serialization.controller;
 
-import io.muenchendigital.digiwf.json.serialization.JsonSchemaSerializationService;
+import io.muenchendigital.digiwf.json.serialization.JsonSerializationService;
 import io.muenchendigital.digiwf.json.serialization.dto.DataDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,18 +21,18 @@ import java.util.Map;
 public class SerializationController {
 
     // inject JsonSchemaSerializationService
-    private final JsonSchemaSerializationService jsonSchemaSerializationService;
+    private final JsonSerializationService jsonSchemaSerializationService;
 
     @PostMapping(path = "/serialize")
     public Map<String, Object> serialize(@RequestBody final DataDto body) throws IOException, URISyntaxException {
         final String rawSchema = this.getSchemaString(body.getSchema());
-        return jsonSchemaSerializationService.serializeData(rawSchema, body.getData(), body.getPreviousData());
+        return this.jsonSchemaSerializationService.serializeData(rawSchema, body.getData(), body.getPreviousData());
     }
 
     @PostMapping(path = "/deserialize")
     public Map<String, Object> deserialize(@RequestBody final DataDto body) throws IOException, URISyntaxException {
         final String rawSchema = this.getSchemaString(body.getSchema());
-        return jsonSchemaSerializationService.deserializeData(rawSchema, body.getData());
+        return this.jsonSchemaSerializationService.deserializeData(rawSchema, body.getData());
     }
 
     private String getSchemaString(final String path) throws IOException, URISyntaxException {

@@ -1,7 +1,9 @@
 package io.muenchendigital.digiwf.json.serialization;
 
 
-import io.muenchendigital.digiwf.json.serialization.serializer.JsonSchemaSerializerImpl;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import io.muenchendigital.digiwf.json.serialization.serializer.JsonSerializerImpl;
 import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,11 +18,11 @@ import java.util.Map;
 
 public class JsonSchemaSerializationServiceTest {
 
-    private JsonSchemaSerializationService jsonSchemaSerializationService;
+    private JsonSerializationService jsonSchemaSerializationService;
 
     @BeforeEach
     private void setUp() {
-        this.jsonSchemaSerializationService = new JsonSchemaSerializationService(new JsonSchemaSerializerImpl());
+        this.jsonSchemaSerializationService = new JsonSerializationService(new JsonSerializerImpl());
     }
 
     @Test
@@ -187,28 +189,33 @@ public class JsonSchemaSerializationServiceTest {
                         "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
                         "objektSchalter", true));
 
-        Assertions.assertThat(JsonSchemaSerializationServiceTest.areEqual(erg, serializedData)).isEqualTo(true);
+        Assertions.assertThat(this.areEqual(erg, serializedData)).isEqualTo(true);
     }
 
     @Test
     public void checkConditionalSubSchema() throws URISyntaxException, IOException {
         final Map<String, Object> data = Map.of(
-                "textarea", "100",
-                "textfeld", "100",
-                "objekt1", Map.of(
-                        "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
-                        "objektSchalter", true)
+                "stringProp1", "100"
         );
 
-        final String rawSchema = this.getSchemaString("/schema/validation/complexObjectSchema.json");
+        final String rawSchema = this.getSchemaString("/schema/validation/conditionalSubSchema.json");
         final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, Map.of());
 
         final Map<String, Object> erg = Map.of(
-                "textarea", "100",
-                "textfeld", "100",
-                "objekt1", Map.of(
-                        "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
-                        "objektSchalter", true));
+                "stringProp1", "100");
+
+        Assertions.assertThat(this.areEqual(erg, serializedData)).isEqualTo(true);
+    }
+
+    @Test
+    public void insertDataInPath() throws URISyntaxException, IOException {
+        final Map<String, Object> data = Map.of(
+                "stringProp1", "100"
+        );
+
+        final DocumentContext document = JsonPath.parse(data);
+        document.add("$.stringProp1", "helloValue");
+
     }
 
     //------------------------------------ Helper Methods ------------------------------------//
@@ -217,16 +224,16 @@ public class JsonSchemaSerializationServiceTest {
         return new String(Files.readAllBytes(Paths.get(this.getClass().getResource(path).toURI())));
     }
 
-    private static boolean areEqual(final Map<String, Object> first, final Map<String, Object> second) {
+    private boolean areEqual(final Map<String, Object> first, final Map<String, Object> second) {
         if (first.size() != second.size()) {
             return false;
         }
 
         return first.entrySet().stream()
-                .allMatch(e -> JsonSchemaSerializationServiceTest.compareObject(e.getValue(), second.get(e.getKey())));
+                .allMatch(e -> this.compareObject(e.getValue(), second.get(e.getKey())));
     }
 
-    private static boolean compareObject(final Object obj1, final Object obj2) {
+    private boolean compareObject(final Object obj1, final Object obj2) {
         if (obj1 instanceof JSONObject) {
             return obj1.toString().equals(obj2.toString());
         }

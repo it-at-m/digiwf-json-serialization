@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * JsonSchemaBaseSerializer is an interface which is used in the JsonSchemaSerializationService to serialize and deserialize data based on a json schema.
  */
-public interface JsonSchemaSerializer {
+public interface JsonSerializer {
 
     /**
      * Serialize data according to the provided json schema and the previous data.
@@ -39,5 +39,24 @@ public interface JsonSchemaSerializer {
      * @return
      */
     List<String> extractRootKeys(final Schema schema);
+
+
+    /**
+     * Extract a property from a json object
+     *
+     * @param data     data to extract value from
+     * @param property path to property
+     * @return property
+     */
+    Object extractValue(final JSONObject data, final String property);
+
+    /**
+     * Insert a value at a spefic place
+     *
+     * @param data     data into which the value is inserted
+     * @param property path into which is inserted
+     * @param value    value
+     */
+    void inserValue(final JSONObject data, final String property, final Object value);
 
 }
