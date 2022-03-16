@@ -1,7 +1,7 @@
 package io.muenchendigital.digiwf.json.serialization;
 
 
-import io.muenchendigital.digiwf.json.serialization.serializer.JsonSchemaSerializer;
+import io.muenchendigital.digiwf.json.serialization.serializer.JsonSchemaSerializerImpl;
 import org.assertj.core.api.Assertions;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,7 @@ public class JsonSchemaSerializationServiceTest {
 
     @BeforeEach
     private void setUp() {
-        this.jsonSchemaSerializationService = new JsonSchemaSerializationService(new JsonSchemaSerializer());
+        this.jsonSchemaSerializationService = new JsonSchemaSerializationService(new JsonSchemaSerializerImpl());
     }
 
     @Test
@@ -57,7 +57,6 @@ public class JsonSchemaSerializationServiceTest {
         final Map<String, Object> validData = new HashMap<>();
 
         validData.put("stringProp1", "fsdafsda");
-        validData.put("dateprop", null);
 
         //override all
         Assertions.assertThat(serializedData).isEqualTo(validData);
@@ -84,7 +83,6 @@ public class JsonSchemaSerializationServiceTest {
 
         validData.put("stringProp1", "stringValue");
         validData.put("numberProp1", 100);
-        validData.put("stringProp2", null);
 
         //override all
         Assertions.assertThat(serializedData).isEqualTo(validData);
@@ -177,7 +175,6 @@ public class JsonSchemaSerializationServiceTest {
                 "objekt1", Map.of(
                         "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
                         "objektSchalter", true)
-
         );
 
         final String rawSchema = this.getSchemaString("/schema/validation/complexObjectSchema.json");
@@ -186,11 +183,32 @@ public class JsonSchemaSerializationServiceTest {
         final Map<String, Object> erg = Map.of(
                 "textarea", "100",
                 "textfeld", "100",
-                "objekt1", new JSONObject(Map.of(
+                "objekt1", Map.of(
                         "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
-                        "objektSchalter", true)));
+                        "objektSchalter", true));
 
-        Assertions.assertThat(this.areEqual(erg, serializedData)).isEqualTo(true);
+        Assertions.assertThat(JsonSchemaSerializationServiceTest.areEqual(erg, serializedData)).isEqualTo(true);
+    }
+
+    @Test
+    public void checkConditionalSubSchema() throws URISyntaxException, IOException {
+        final Map<String, Object> data = Map.of(
+                "textarea", "100",
+                "textfeld", "100",
+                "objekt1", Map.of(
+                        "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
+                        "objektSchalter", true)
+        );
+
+        final String rawSchema = this.getSchemaString("/schema/validation/complexObjectSchema.json");
+        final Map<String, Object> serializedData = this.jsonSchemaSerializationService.serializeData(rawSchema, data, Map.of());
+
+        final Map<String, Object> erg = Map.of(
+                "textarea", "100",
+                "textfeld", "100",
+                "objekt1", Map.of(
+                        "objektTextfeld", "fdsfsdafsdafadsfsadfsdafd",
+                        "objektSchalter", true));
     }
 
     //------------------------------------ Helper Methods ------------------------------------//
@@ -199,16 +217,16 @@ public class JsonSchemaSerializationServiceTest {
         return new String(Files.readAllBytes(Paths.get(this.getClass().getResource(path).toURI())));
     }
 
-    private boolean areEqual(final Map<String, Object> first, final Map<String, Object> second) {
+    private static boolean areEqual(final Map<String, Object> first, final Map<String, Object> second) {
         if (first.size() != second.size()) {
             return false;
         }
 
         return first.entrySet().stream()
-                .allMatch(e -> this.compareObject(e.getValue(), second.get(e.getKey())));
+                .allMatch(e -> JsonSchemaSerializationServiceTest.compareObject(e.getValue(), second.get(e.getKey())));
     }
 
-    private boolean compareObject(final Object obj1, final Object obj2) {
+    private static boolean compareObject(final Object obj1, final Object obj2) {
         if (obj1 instanceof JSONObject) {
             return obj1.toString().equals(obj2.toString());
         }
