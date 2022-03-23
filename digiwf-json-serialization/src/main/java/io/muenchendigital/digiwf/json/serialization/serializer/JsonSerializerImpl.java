@@ -1,5 +1,6 @@
 package io.muenchendigital.digiwf.json.serialization.serializer;
 
+import io.muenchendigital.digiwf.json.serialization.model.JsonPointer;
 import org.everit.json.schema.CombinedSchema;
 import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.Schema;
@@ -15,37 +16,6 @@ import java.util.stream.Collectors;
 public class JsonSerializerImpl implements JsonSerializer {
 
     /**
-     * Serialize data based on the schema.
-     * <p>
-     * Returns the data for the jsonSchema.
-     * If an object is readonly the value from the previousData is applied. Otherwise, the serializer uses the value from data.
-     *
-     * @param schema
-     * @param data
-     * @param previousData
-     * @return
-     */
-    @Override
-    public Map<String, Object> serialize(final Schema schema, final JSONObject data, final JSONObject previousData) {
-        if (schema instanceof ObjectSchema) {
-            return this.serializeObject(((ObjectSchema) schema).getPropertySchemas(), data, previousData);
-        }
-
-        // combined schemas are saved on the next higher object schema level -> search for the next object schema
-        // therefore iterate all sub schemas of the schema and serialize the data for every schema
-        // by calling serialize(...) recursively
-        if (schema instanceof CombinedSchema) {
-            final CombinedSchema combinedSchema = (CombinedSchema) schema;
-            return combinedSchema.getSubschemas().stream()
-                    .map(subSchema -> this.serialize(subSchema, data, previousData))
-                    .flatMap(m -> m.entrySet().stream())
-                    .collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
-        }
-
-        return Collections.emptyMap();
-    }
-
-    /**
      * Deserialize data based on the schema.
      * <p>
      * This function compares the keys from data with the keys provided in the json schema
@@ -59,7 +29,7 @@ public class JsonSerializerImpl implements JsonSerializer {
     public Map<String, Object> deserialize(final Schema schema, final Map<String, Object> data) {
 
         // remove all keys from data that are not in schema
-        final List<String> schemaKeys = this.extractRootKeys(schema);
+        final Set<String> schemaKeys = this.extractRootKeys(schema);
         final List<String> dataKeys = data.keySet().stream()
                 .filter(schemaKeys::contains)
                 .collect(Collectors.toList());
@@ -75,15 +45,49 @@ public class JsonSerializerImpl implements JsonSerializer {
         return result;
     }
 
+    @Override
+    public JSONObject filter(final Schema schema, final JSONObject data, final boolean filterReadOnly) {
+        if (schema instanceof ObjectSchema) {
+            return this.filter(((ObjectSchema) schema).getPropertySchemas(), data, filterReadOnly);
+        }
+
+        final JSONObject result = new JSONObject();
+
+        // combined schemas are saved on the next higher object schema level -> search for the next object schema
+        // therefore iterate all sub schemas of the schema and serialize the data for every schema
+        // by calling filter(...) recursively
+        if (schema instanceof CombinedSchema) {
+            final CombinedSchema combinedSchema = (CombinedSchema) schema;
+            combinedSchema.getSubschemas().stream()
+                    .map(subSchema -> this.filter(subSchema, data, filterReadOnly))
+                    .forEach(obj -> obj.keySet().forEach(key -> result.put(key, obj.get(key))));
+        }
+
+        return result;
+    }
+
+    /**
+     * Merge two json objects
+     *
+     * @param source object that should be merged
+     * @param target object to be merged into
+     * @return merged object
+     */
+    @Override
+    public Map<String, Object> merge(final JSONObject source, final JSONObject target) {
+        return this.deepMerge(source, target).toMap();
+    }
+
     /**
      * Returns all root keys that are in the json schema.
      *
      * @param schema
      * @return root keys
      */
-    public List<String> extractRootKeys(final Schema schema) {
+    @Override
+    public Set<String> extractRootKeys(final Schema schema) {
         if (schema instanceof ObjectSchema) {
-            return new ArrayList<>(((ObjectSchema) schema).getPropertySchemas().keySet());
+            return new HashSet<>(((ObjectSchema) schema).getPropertySchemas().keySet());
         }
 
         // if schema is a combined schema iterate all sub schemas and get the keys for every sub schema
@@ -92,84 +96,105 @@ public class JsonSerializerImpl implements JsonSerializer {
             final CombinedSchema combinedSchema = (CombinedSchema) schema;
             return combinedSchema.getSubschemas().stream()
                     .map(this::extractRootKeys)
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
+                    .flatMap(Set::stream)
+                    .collect(Collectors.toSet());
         }
-
-        return Collections.emptyList();
+        return Collections.emptySet();
     }
 
     /**
-     * Extract a property from a json object
+     * Extract a value from a json object
      *
-     * @param data     data to extract value from
-     * @param property path to property
+     * @param data        data to extract value from
+     * @param jsonPointer path to property
      * @return property
      */
     @Override
-    public Object extractValue(final JSONObject data, final String property) {
-        return null;
+    public Object extractValue(final JSONObject data, final JsonPointer jsonPointer) {
+        return jsonPointer.queryFrom(data);
     }
 
     /**
-     * @param data     data to inser
-     * @param property path to property
+     * Generates a json object with value for a given pointer
+     *
+     * @param jsonPointer pointer in which the value should be inserted
+     * @param value       value that sh
+     * @return generated value
      */
     @Override
-    public void inserValue(final JSONObject data, final String property, final Object value) {
-
-        //go through data until nothing left
-
-
-        //add or override value
-
-
-//        if (schema instanceof ObjectSchema) {
-//            return this.serializeObject(((ObjectSchema) schema).getPropertySchemas(), data, previousData);
-//        }
-//
-//        // combined schemas are saved on the next higher object schema level -> search for the next object schema
-//        // therefore iterate all sub schemas of the schema and serialize the data for every schema
-//        // by calling serialize(...) recursively
-//        if (schema instanceof CombinedSchema) {
-//            final CombinedSchema combinedSchema = (CombinedSchema) schema;
-//            return combinedSchema.getSubschemas().stream()
-//                    .map(subSchema -> this.serialize(subSchema, data, previousData))
-//                    .flatMap(m -> m.entrySet().stream())
-//                    .collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
-//        }
-//
-//        return Collections.emptyMap();
+    public JSONObject generateValue(final JsonPointer jsonPointer, final String value) {
+        return jsonPointer.generateObjectStructure(value);
     }
+
+    /**
+     * Initialize
+     *
+     * @param keys keys that should be initialized
+     * @return
+     */
+    @Override
+    public JSONObject generateObject(final Set<String> keys) {
+        final JSONObject jsonObject = new JSONObject();
+        keys.forEach(key -> jsonObject.put(key, ""));
+        return jsonObject;
+    }
+
 
     //--------------------------------------------------- helper methods ---------------------------------------------------//
 
 
-    private Map<String, Object> serializeObject(final Map<String, Schema> object, final JSONObject data, final JSONObject previousData) {
-
-        // iterate through props and fill them with values
-        for (final Map.Entry<String, Schema> entry : object.entrySet()) {
-
-            // if it is a nested object go recursive
-            //TODO Handle ArrayObject Lists
-            if (entry.getValue() instanceof ObjectSchema) {
-                previousData.put(entry.getKey(), this.serializeObjectSchema(data, previousData, entry));
-            } else if (entry.getValue() instanceof CombinedSchema && !entry.getValue().getUnprocessedProperties().containsKey("fieldType")) {
-                this.serialize(entry.getValue(), data, previousData).forEach(previousData::put);
+    private JSONObject deepMerge(final JSONObject source, final JSONObject target) {
+        for (final String key : source.keySet()) {
+            final Object value = source.get(key);
+            if (!target.has(key)) {
+                //target does not have the same key, should be added to target
+                if (value != null && value != JSONObject.NULL) //only add if the source value is not null
+                    target.put(key, value);
             } else {
-
-                if (Boolean.TRUE != entry.getValue().isReadOnly()) {
-                    previousData.put(entry.getKey(), data.has(entry.getKey()) ? data.get(entry.getKey()) : null);
+                if (value != null && value != JSONObject.NULL) {
+                    if (value instanceof JSONObject) {
+                        //source value is json object, start deep merge
+                        this.deepMerge((JSONObject) value, (JSONObject) target.get(key));
+                    } else {
+                        target.put(key, value);
+                    }
+                } else {
+                    target.remove(key);
                 }
             }
         }
-        return previousData.toMap();
+        return target;
     }
 
-    private JSONObject serializeObjectSchema(final JSONObject data, final JSONObject previousData, final Map.Entry<String, Schema> entry) {
-        final JSONObject prevData = previousData.has(entry.getKey()) ? previousData.getJSONObject(entry.getKey()) : new JSONObject();
-        final Map<String, Object> objectData = this.serializeObject(((ObjectSchema) entry.getValue()).getPropertySchemas(), data, prevData);
-        return new JSONObject(objectData);
+    private JSONObject filter(final Map<String, Schema> schema, final JSONObject data, final boolean filterReadOnly) {
+        final JSONObject result = new JSONObject();
+
+        // iterate through props and fill them with values
+        for (final Map.Entry<String, Schema> entry : schema.entrySet()) {
+            // if it is a nested object go recursive
+            if (entry.getValue() instanceof ObjectSchema) {
+                result.put(entry.getKey(), this.filterObject(this.getDataOrEmptyObject(data, entry.getKey()), entry, filterReadOnly));
+            } else if (entry.getValue() instanceof CombinedSchema && !entry.getValue().getUnprocessedProperties().containsKey("fieldType")) {
+                final JSONObject obj = this.filter(entry.getValue(), data, filterReadOnly);
+                obj.keySet().forEach(key -> result.put(key, obj.get(key)));
+            } else {
+                if (!filterReadOnly || Boolean.TRUE != entry.getValue().isReadOnly()) {
+                    result.put(entry.getKey(), data.has(entry.getKey()) ? data.get(entry.getKey()) : JSONObject.NULL);
+                }
+            }
+        }
+        return result;
+    }
+
+    private JSONObject filterObject(JSONObject data, final Map.Entry<String, Schema> schema, final boolean filterReadOnly) {
+        if (data == null) {
+            data = new JSONObject();
+        }
+        return this.filter(((ObjectSchema) schema.getValue()).getPropertySchemas(), data, filterReadOnly);
+    }
+
+    private JSONObject getDataOrEmptyObject(final JSONObject data, final String key) {
+        return data.has(key) ? (JSONObject) data.get(key) : null;
     }
 
 }

@@ -56,6 +56,25 @@
               },
               "x-rules": []
             },
+            "FormField_Empfaenger": {
+              "fieldType": "user-input",
+              "title": "Empfänger*in",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "key": "FormField_Empfaenger",
+              "x-options": {
+                "fieldColProps": {
+                  "cols": 12,
+                  "sm": 12,
+                  "messages": {}
+                }
+              },
+              "x-props": {
+                "outlined": true
+              }
+            },
             "zahl": {
               "fieldType": "integer",
               "title": "Zahl",
@@ -80,13 +99,13 @@
         {
           "title": "Objektgruppe",
           "containerType": "objectGroup",
-          "type": "object",
           "key": "8cc59fa8-72bb-43f9-bf0e-4136c62337ef",
           "x-options": {
             "childrenClass": "pr-5 pl-0"
           },
           "properties": {
             "objekt1": {
+              "additionalProperties": false,
               "key": "d6d8d7a1-e812-42ac-9135-8242f93b6158",
               "fieldType": "object",
               "title": "Dynamisches Objekt",

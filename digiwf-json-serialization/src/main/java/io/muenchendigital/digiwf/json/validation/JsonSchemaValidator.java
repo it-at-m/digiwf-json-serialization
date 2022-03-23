@@ -4,8 +4,6 @@
 
 package io.muenchendigital.digiwf.json.validation;
 
-import org.everit.json.schema.CombinedSchema;
-import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.regexp.RE2JRegexpFactory;
@@ -41,94 +39,58 @@ public class JsonSchemaValidator {
 
     /**
      * Checks if a property is defined on the json schema.
+     * Currently, not working for object lists and optional schemas
      *
-     * @param schema   schema that is checked
-     * @param property property that is search for
+     * @param schema      schema that is checked
+     * @param jsonPointer path to property
      * @return if property is defined
      */
-    public boolean definesProperty(final Map<String, Object> schema, final String property) {
+    public boolean definesProperty(final Map<String, Object> schema, final String jsonPointer) {
         final Schema schemaObj = this.createSchema(new JSONObject(schema));
-        return this.definesProperty(schemaObj, property);
+        return this.definesProperty(schemaObj, jsonPointer);
     }
 
     /**
      * Checks if a property is defined on the json schema.
+     * Currently not working for optional schemas
      *
-     * @param schema   schema that is checked
-     * @param property property that is search for
+     * @param schema      schema that is checked
+     * @param jsonPointer path to property
      * @return if property is defined
      */
-    public boolean definesProperty(final Schema schema, final String property) {
-        if (schema instanceof ObjectSchema) {
-            return schema.definesProperty(property);
-        }
+    public boolean definesProperty(final Schema schema, final String jsonPointer) {
+        return schema.definesProperty(jsonPointer);
+    }
 
-        if (schema instanceof CombinedSchema) {
-            final CombinedSchema combinedSchema = (CombinedSchema) schema;
-            return combinedSchema.getSubschemas().stream().anyMatch(obj -> this.definesProperty(obj, property));
-        }
 
-        return false;
+    /**
+     * Checks if a property is readonly on the json schema.
+     * Currently, not working for object lists and optional schemas
+     * Defines property should be checked first - otherwise returns false
+     *
+     * @param schema      schema that is checked
+     * @param jsonPointer path to property
+     * @return if property is defined
+     */
+    public boolean definesPropertyReadonly(final Map<String, Object> schema, final String jsonPointer) {
+        final Schema schemaObj = this.createSchema(new JSONObject(schema));
+        return this.definesPropertyReadonly(schemaObj, jsonPointer);
     }
 
     /**
-     * @param schema   Schema to search for the property
-     * @param property property
-     * @return
+     * Checks if a property is readonly on the json schema.
+     * Currently, not working for object lists and optional schemas
+     * Defines property should be checked first - otherwise returns false
+     *
+     * @param schema      schema that is checked
+     * @param jsonPointer path to property
+     * @return if property is defined
      */
-    public boolean isReadOnlyProperty(final Schema schema, final String property) {
-        if (schema instanceof ObjectSchema) {
-            return this.isReadOnlyProperty((ObjectSchema) schema, property);
-        }
-
-        if (schema instanceof CombinedSchema) {
-            //TODO not possible to set CombinedSchemas readOnly right now
-            final CombinedSchema combinedSchema = (CombinedSchema) schema;
-            return combinedSchema.getSubschemas().stream().anyMatch(obj -> this.isReadOnlyProperty(obj, property));
-        }
-
-        //TODO Conditional Schema
-
-        return false;
+    public boolean definesPropertyReadonly(final Schema schema, final String jsonPointer) {
+        return schema.isReadOnlyProperty(jsonPointer);
     }
 
     //------------------------------------- helper methods -------------------------------------//
-
-    private boolean isReadOnlyProperty(final ObjectSchema schema, String field) {
-        field = field.replaceFirst("^#", "").replaceFirst("^/", "");
-        final int firstSlashIdx = field.indexOf('/');
-        final String nextToken;
-        final String remaining;
-        if (firstSlashIdx == -1) {
-            nextToken = field;
-            remaining = null;
-        } else {
-            nextToken = field.substring(0, firstSlashIdx);
-            remaining = field.substring(firstSlashIdx + 1);
-        }
-        return !field.isEmpty() && this.isReadOnlyProperty(schema, nextToken, remaining);
-    }
-
-    private boolean isReadOnlyProperty(final ObjectSchema schema, String current, final String remaining) {
-        current = this.unescape(current);
-        final boolean hasSuffix = !(remaining == null);
-        if (schema.getPropertySchemas().containsKey(current)) {
-            if (schema.isReadOnly() != null && schema.isReadOnly()) {
-                return true;
-            } else if (hasSuffix) {
-                return this.isReadOnlyProperty(schema.getPropertySchemas().get(current), remaining);
-            } else if (schema.getPropertySchemas().get(current).isReadOnly() != null && schema.getPropertySchemas().get(current).isReadOnly()) {
-                return true;
-            }
-        }
-        return schema.isReadOnly() != null && schema.isReadOnly();
-    }
-
-    private String unescape(final String token) {
-        return token.replace("~1", "/").replace("~0", "~")
-                .replace("\\\"", "\"")
-                .replace("\\\\", "\\");
-    }
 
     private void validate(final Map<String, Object> schemaObject, final JSONObject data) {
         final Schema schema = this.createSchema(new JSONObject(schemaObject));

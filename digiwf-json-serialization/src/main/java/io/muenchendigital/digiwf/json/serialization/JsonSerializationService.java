@@ -1,5 +1,6 @@
 package io.muenchendigital.digiwf.json.serialization;
 
+import io.muenchendigital.digiwf.json.serialization.model.JsonPointer;
 import io.muenchendigital.digiwf.json.serialization.serializer.JsonSerializer;
 import lombok.RequiredArgsConstructor;
 import org.everit.json.schema.Schema;
@@ -18,46 +19,61 @@ public class JsonSerializationService {
     private final JsonSerializer serializer;
 
     /**
-     * Serialize data for a specific schema
-     * <p>
-     * Pass the rawData that you want to serialize and the rawPreviousData.
-     * According to the rawData the rawPreviousData is updated and returned.
+     * Extract a value from a json object
      *
-     * @param schemaObject
-     * @param rawData
-     * @param rawPreviousData
-     * @return serialized data
+     * @param schema schema
+     * @param data   data to extract value from
+     * @return filtered object
      */
-    public Map<String, Object> serializeData(final String schemaObject, final Map<String, Object> rawData, final Map<String, Object> rawPreviousData) {
-        final Schema schema = JsonSerializationService.createSchema(new JSONObject(schemaObject));
-        return this.serializer.serialize(schema, new JSONObject(rawData), new JSONObject(rawPreviousData));
+    public JSONObject filter(final Map<String, Object> schema, final Map<String, Object> data, final boolean filterReadOnly) {
+        final Schema schemaObj = JsonSerializationService.createSchema(new JSONObject(schema));
+        return this.serializer.filter(schemaObj, new JSONObject(data), filterReadOnly);
     }
 
     /**
-     * Serialize data for a specific schema
-     * <p>
-     * Pass the rawData that you want to serialize and the rawPreviousData.
-     * According to the rawData the rawPreviousData is updated and returned.
+     * Extract a value from a json object
      *
-     * @param schemaObject
-     * @param rawData
-     * @param rawPreviousData
-     * @return serialized data
+     * @param schema schema
+     * @param data   data to extract value from
+     * @return filtered object
      */
-    public Map<String, Object> serializeData(final Map<String, Object> schemaObject, final Map<String, Object> rawData, final Map<String, Object> rawPreviousData) {
-        final Schema schema = JsonSerializationService.createSchema(new JSONObject(schemaObject));
-        return this.serializer.serialize(schema, new JSONObject(rawData), new JSONObject(rawPreviousData));
+    public JSONObject filter(final String schema, final Map<String, Object> data, final boolean filterReadOnly) {
+        final Schema schemaObj = JsonSerializationService.createSchema(new JSONObject(schema));
+        return this.serializer.filter(schemaObj, new JSONObject(data), filterReadOnly);
+    }
+
+
+    /**
+     * Merge two JSON Objects.
+     *
+     * @param source
+     * @param target
+     * @return merged data
+     */
+    public Map<String, Object> merge(final JSONObject source, final JSONObject target) {
+        return this.serializer.merge(source, target);
     }
 
     /**
-     * @param schemaObject
-     * @param rawData
-     * @param rawPreviousData
-     * @return serialized data
+     * Extract a value from a json object
+     *
+     * @param data        data to extract value from
+     * @param jsonPointer path to property
+     * @return property
      */
-    public Map<String, Object> getAccessMap(final String schemaObject, final Map<String, Object> rawData, final Map<String, Object> rawPreviousData) {
-        final Schema schema = JsonSerializationService.createSchema(new JSONObject(schemaObject));
-        return this.serializer.serialize(schema, new JSONObject(rawData), new JSONObject(rawPreviousData));
+    public Object extractValue(final Map<String, Object> data, final String jsonPointer) {
+        return this.serializer.extractValue(new JSONObject(data), new JsonPointer(jsonPointer));
+    }
+
+    /**
+     * Generates a json object with value for a given pointer
+     *
+     * @param jsonPointer pointer in which the value should be inserted
+     * @param value       value that sh
+     * @return generated value
+     */
+    public JSONObject generateValue(final String jsonPointer, final String value) {
+        return this.serializer.generateValue(new JsonPointer(jsonPointer), value);
     }
 
     /**
@@ -94,11 +110,7 @@ public class JsonSerializationService {
      * @return
      */
     public static Schema createSchema(final String schema) {
-        return SchemaLoader.builder().schemaJson(new JSONObject(schema))
-                .draftV7Support()
-                .regexpFactory(new RE2JRegexpFactory())
-                .build()
-                .load()
-                .build();
+        return createSchema(new JSONObject(schema));
     }
+
 }

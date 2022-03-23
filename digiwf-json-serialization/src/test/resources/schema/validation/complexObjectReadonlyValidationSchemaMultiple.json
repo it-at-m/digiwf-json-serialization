@@ -628,10 +628,10 @@
               "properties": {
                 "fahrzeuge": {
                   "key": "fahrzeuge",
+                  "readOnly": true,
                   "fieldType": "arrayObject",
                   "title": "Fahrzeug",
                   "type": "array",
-                  "readOnly": true,
                   "items": {
                     "type": "object",
                     "properties": {
@@ -992,7 +992,6 @@
               "fieldType": "FieldType.Integer",
               "type": "integer",
               "title": "Ich bin eine Ganzzahl",
-              "readOnly": true,
               "x-options": {
                 "fieldColProps": {
                   "cols": 12,

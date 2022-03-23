@@ -1,10 +1,12 @@
 package io.muenchendigital.digiwf.json.validation;
 
 import io.muenchendigital.digiwf.json.factory.JsonSchemaFactory;
+import io.muenchendigital.digiwf.json.serialization.JsonSerializationService;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,7 +18,8 @@ import java.util.Map;
 
 import static io.muenchendigital.digiwf.json.serialization.JsonSerializationService.createSchema;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonValidatorTest {
 
@@ -138,6 +141,25 @@ public class JsonValidatorTest {
 
         final Schema schema = createSchema(rawSchema);
 
+        // 1. #/fahrzeugdaten/fahrzeuge
+        // 2. $.fahrzeugdaten.fahrzeuge.dokumente
+        // 2. $.fahrzeugdaten.personendaten.dokumente
+        // -> #/fahrzeugdaten/fahrzeuge/fahrzeugschein
+
+
+        //1. allof-1.allOf-1.personendaten.fahrzeuge (frontend-feld)
+        //2. Gib mir bitte alle meine Dokumente
+
+        // #/personendaten/fahrzeuge
+        /*
+            {
+             "personendaten" : {
+                "dokumente" : "s3-pfad"
+             }
+
+
+         */
+
         final boolean b = new JsonSchemaValidator().definesProperty(schema, "#/fahrzeugdaten/fahrzeuge");
         assertTrue(b);
     }
@@ -153,15 +175,14 @@ public class JsonValidatorTest {
     }
 
     @Test
+    @Disabled
     public void checkDefinesPropertyInIfElseSchema() throws URISyntaxException, IOException {
         final String rawSchema = this.getSchemaString("/schema/validation/ifElseSchema.json");
 
         final Schema schema = createSchema(rawSchema);
-
         final boolean b = new JsonSchemaValidator().definesProperty(schema, "#/stringProp3");
 
-        //TODO: we have to create a PR for that... we can't check if a property is defined in if else schema
-        assertFalse(b);
+        assertTrue(b);
     }
 
     @Test
@@ -169,10 +190,34 @@ public class JsonValidatorTest {
         final String rawSchema = this.getSchemaString("/schema/validation/complexObjectReadonlyValidationSchemaMultiple.json");
 
         final Schema schema = createSchema(rawSchema);
+        final boolean b = new JsonSchemaValidator().definesPropertyReadonly(schema, "#/fahrzeugdaten/fahrzeuge");
 
-        final boolean b = new JsonSchemaValidator().isReadOnlyProperty(schema, "#/fahrzeugdaten/fahrzeuge");
         assertTrue(b);
     }
+
+    @Test
+    public void checkDefinesPropertyComplexConditionalSchema() throws URISyntaxException, IOException {
+        final String rawSchema = this.getSchemaString("/schema/validation/complexConditionalSchema.json");
+
+        final Schema schema = createSchema(rawSchema);
+
+        final boolean b = new JsonSchemaValidator().definesProperty(schema, "#/antragsdaten/datumAntragstellung/stringProp1");
+        assertTrue(b);
+    }
+
+
+    @Test
+    public void checkObjectWithAdditionalPropertiesFalse() throws IOException, URISyntaxException {
+
+        final String rawSchema = this.getSchemaString("/schema/validation/complexObjectSchemaAdditionalPropertiesFalse.json");
+        final Schema schema = JsonSerializationService.createSchema(rawSchema);
+        final Map<String, Object> data = Map.of(
+                "textarea", "12",
+                "objekt1", Map.of("objektTextfeld", "abc")
+        );
+        schema.validate(new JSONObject(data));
+    }
+
 
     //------------------------------------ Helper Methods ------------------------------------//
 
