@@ -1,8 +1,8 @@
 package io.muenchendigital.digiwf.json.serialization.configuration;
 
-import io.muenchendigital.digiwf.json.serialization.JsonSchemaSerializationService;
-import io.muenchendigital.digiwf.json.serialization.serializer.JsonSchemaBaseSerializer;
-import io.muenchendigital.digiwf.json.serialization.serializer.JsonSchemaSerializer;
+import io.muenchendigital.digiwf.json.serialization.JsonSerializationService;
+import io.muenchendigital.digiwf.json.serialization.serializer.JsonSerializer;
+import io.muenchendigital.digiwf.json.serialization.serializer.JsonSerializerImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,13 +13,13 @@ public class JsonSerializationAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public JsonSchemaBaseSerializer jsonSchemaSerializer() {
-        return new JsonSchemaSerializer();
+    public JsonSerializer jsonSchemaSerializer() {
+        return new JsonSerializerImpl();
     }
 
     @Bean
-    public JsonSchemaSerializationService jsonSchemaSerializationService(final JsonSchemaBaseSerializer serializer) {
-        return new JsonSchemaSerializationService(serializer);
+    public JsonSerializationService jsonSchemaSerializationService(final JsonSerializer serializer) {
+        return new JsonSerializationService(serializer);
     }
 
 }
