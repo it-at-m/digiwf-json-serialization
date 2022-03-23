@@ -3,6 +3,7 @@ package io.muenchendigital.digiwf.json.serialization.controller;
 import io.muenchendigital.digiwf.json.serialization.JsonSerializationService;
 import io.muenchendigital.digiwf.json.serialization.dto.DataDto;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,8 @@ public class SerializationController {
     @PostMapping(path = "/serialize")
     public Map<String, Object> serialize(@RequestBody final DataDto body) throws IOException, URISyntaxException {
         final String rawSchema = this.getSchemaString(body.getSchema());
-        return this.jsonSchemaSerializationService.serializeData(rawSchema, body.getData(), body.getPreviousData());
+        final JSONObject filteredData = this.jsonSchemaSerializationService.filter(rawSchema, body.getData(), true);
+        return this.jsonSchemaSerializationService.merge(filteredData, new JSONObject(body.getPreviousData()));
     }
 
     @PostMapping(path = "/deserialize")
