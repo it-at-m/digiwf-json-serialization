@@ -139,7 +139,6 @@ public class JsonSerializerImpl implements JsonSerializer {
         return jsonObject;
     }
 
-
     //--------------------------------------------------- helper methods ---------------------------------------------------//
 
     private JSONObject deepMerge(final JSONObject source, final JSONObject target) {
