@@ -417,6 +417,35 @@ public class JsonSchemaSerializationServiceTest {
         assertNull(value);
     }
 
+    @Test
+    public void initalizeAndMergeObjectSchema() throws URISyntaxException, IOException {
+        final String rawSchema = this.getSchemaString("/schema/serialization/objectSchema.json");
+
+        final Map<String, Object> newData = Map.of(
+                "booleanprop", true,
+                "numberProp1", 12,
+                "objectProp", Map.of(
+                        "stringProp1", "abc",
+                        "textarea1", "xyz"
+                )
+        );
+
+        final JSONObject initializedObject = this.jsonSchemaSerializationService.initialize(rawSchema);
+        final Map<String, Object> mergedData = this.jsonSchemaSerializationService.merge(new JSONObject(newData), initializedObject);
+
+        Assertions.assertThat(mergedData).isEqualTo(Map.of(
+                "booleanprop", true,
+                "dateprop", "",
+                "numberProp1", 12,
+                "objectProp", Map.of(
+                        "stringProp1", "abc",
+                        "textarea1", "xyz"
+                ),
+                "stringProp1", "",
+                "textarea1", ""
+        ));
+    }
+
     //------------------------------------ Helper Methods ------------------------------------//
 
     private String getSchemaString(final String path) throws IOException, URISyntaxException {
