@@ -139,9 +139,7 @@ public class JsonSerializerImpl implements JsonSerializer {
         return jsonObject;
     }
 
-
     //--------------------------------------------------- helper methods ---------------------------------------------------//
-
 
     private JSONObject deepMerge(final JSONObject source, final JSONObject target) {
         for (final String key : source.keySet()) {
@@ -154,7 +152,7 @@ public class JsonSerializerImpl implements JsonSerializer {
                 if (value != null && value != JSONObject.NULL) {
                     if (value instanceof JSONObject) {
                         //source value is json object, start deep merge
-                        this.deepMerge((JSONObject) value, (JSONObject) target.get(key));
+                        target.put(key, this.deepMerge((JSONObject) value, this.getObjectOrEmpty(target.get(key))));
                     } else {
                         target.put(key, value);
                     }
@@ -164,6 +162,13 @@ public class JsonSerializerImpl implements JsonSerializer {
             }
         }
         return target;
+    }
+
+    private JSONObject getObjectOrEmpty(final Object object) {
+        if (object == null | !(object instanceof JSONObject)) {
+            return new JSONObject();
+        }
+        return (JSONObject) object;
     }
 
     private JSONObject filter(final Map<String, Schema> schema, final JSONObject data, final boolean filterReadOnly) {
