@@ -9,6 +9,7 @@ import org.everit.json.schema.regexp.RE2JRegexpFactory;
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Service to handle data serialization and deserialization
@@ -74,6 +75,19 @@ public class JsonSerializationService {
      */
     public JSONObject generateValue(final String jsonPointer, final String value) {
         return this.serializer.generateValue(new JsonPointer(jsonPointer), value);
+    }
+
+
+    /**
+     * Initialize the give schema with default values.
+     *
+     * @param schema that should be initialized
+     * @return data
+     */
+    public JSONObject initialize(final String schema) {
+        final Schema schemaObj = JsonSerializationService.createSchema(new JSONObject(schema));
+        final Set<String> rootKeys = this.serializer.extractRootKeys(schemaObj);
+        return this.serializer.generateObject(rootKeys);
     }
 
     /**

@@ -417,6 +417,19 @@ public class JsonSchemaSerializationServiceTest {
         assertNull(value);
     }
 
+    @Test
+    public void initializeSimpleSchema() throws URISyntaxException, IOException {
+        final String rawSchema = this.getSchemaString("/schema/serialization/simpleSchema.json");
+
+        final JSONObject initializedObject = this.jsonSchemaSerializationService.initialize(rawSchema);
+
+        Assertions.assertThat(initializedObject.toMap()).isEqualTo(Map.of(
+                "numberProp1", "",
+                "stringProp1", "",
+                "stringProp2", ""
+        ));
+    }
+
     //------------------------------------ Helper Methods ------------------------------------//
 
     private String getSchemaString(final String path) throws IOException, URISyntaxException {
