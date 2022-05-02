@@ -26,7 +26,7 @@
     <modules>
         <module>digiwf-json-serialization</module>
         <module>digiwf-json-serialization-starter</module>
-        <module>example</module>
+        <module>example-json-serialization</module>
     </modules>
 
     <dependencyManagement>
