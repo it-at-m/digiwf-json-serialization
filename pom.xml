@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.muenchendigital.digiwf</groupId>
     <artifactId>digiwf-json-serialization-parent</artifactId>
-    <version>0.0.5</version>
+    <version>0.1.0</version>
     <name>digiwf-json-serialization-parent</name>
     <packaging>pom</packaging>
     <description>Json Schema Serialization used by DigiWF</description>
@@ -26,7 +26,7 @@
     <modules>
         <module>digiwf-json-serialization</module>
         <module>digiwf-json-serialization-starter</module>
-        <module>example</module>
+        <module>example-json-serialization</module>
     </modules>
 
     <dependencyManagement>

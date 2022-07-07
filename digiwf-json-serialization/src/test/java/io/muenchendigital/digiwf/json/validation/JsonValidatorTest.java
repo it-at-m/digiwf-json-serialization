@@ -6,7 +6,6 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,10 +15,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import static io.muenchendigital.digiwf.json.serialization.JsonSerializationService.createSchema;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JsonValidatorTest {
 
@@ -134,77 +131,6 @@ public class JsonValidatorTest {
 
         this.validationService.validate(JsonValidatorTest.getSchemaMap(rawSchema), data);
     }
-
-    @Test
-    public void checkDefinesPropertyInObjectSchema() throws URISyntaxException, IOException {
-        final String rawSchema = this.getSchemaString("/schema/validation/complexObjectReadonlyValidationSchemaMultiple.json");
-
-        final Schema schema = createSchema(rawSchema);
-
-        // 1. #/fahrzeugdaten/fahrzeuge
-        // 2. $.fahrzeugdaten.fahrzeuge.dokumente
-        // 2. $.fahrzeugdaten.personendaten.dokumente
-        // -> #/fahrzeugdaten/fahrzeuge/fahrzeugschein
-
-
-        //1. allof-1.allOf-1.personendaten.fahrzeuge (frontend-feld)
-        //2. Gib mir bitte alle meine Dokumente
-
-        // #/personendaten/fahrzeuge
-        /*
-            {
-             "personendaten" : {
-                "dokumente" : "s3-pfad"
-             }
-
-
-         */
-
-        final boolean b = new JsonSchemaValidator().definesProperty(schema, "#/fahrzeugdaten/fahrzeuge");
-        assertTrue(b);
-    }
-
-    @Test
-    public void checkDefinesPropertyInConditionalSchema() throws URISyntaxException, IOException {
-        final String rawSchema = this.getSchemaString("/schema/validation/conditionalSubSchema.json");
-
-        final Schema schema = createSchema(rawSchema);
-
-        final boolean b = new JsonSchemaValidator().definesProperty(schema, "#/stringProp2");
-        assertTrue(b);
-    }
-
-    @Test
-    @Disabled
-    public void checkDefinesPropertyInIfElseSchema() throws URISyntaxException, IOException {
-        final String rawSchema = this.getSchemaString("/schema/validation/ifElseSchema.json");
-
-        final Schema schema = createSchema(rawSchema);
-        final boolean b = new JsonSchemaValidator().definesProperty(schema, "#/stringProp3");
-
-        assertTrue(b);
-    }
-
-    @Test
-    public void checkIsReadOnlyPropertyInObjectSchema() throws URISyntaxException, IOException {
-        final String rawSchema = this.getSchemaString("/schema/validation/complexObjectReadonlyValidationSchemaMultiple.json");
-
-        final Schema schema = createSchema(rawSchema);
-        final boolean b = new JsonSchemaValidator().definesPropertyReadonly(schema, "#/fahrzeugdaten/fahrzeuge");
-
-        assertTrue(b);
-    }
-
-    @Test
-    public void checkDefinesPropertyComplexConditionalSchema() throws URISyntaxException, IOException {
-        final String rawSchema = this.getSchemaString("/schema/validation/complexConditionalSchema.json");
-
-        final Schema schema = createSchema(rawSchema);
-
-        final boolean b = new JsonSchemaValidator().definesProperty(schema, "#/antragsdaten/datumAntragstellung/stringProp1");
-        assertTrue(b);
-    }
-
 
     @Test
     public void checkObjectWithAdditionalPropertiesFalse() throws IOException, URISyntaxException {

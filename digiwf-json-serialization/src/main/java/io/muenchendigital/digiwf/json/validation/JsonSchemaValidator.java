@@ -37,58 +37,6 @@ public class JsonSchemaValidator {
         schemaObj.validate(new JSONObject(data));
     }
 
-    /**
-     * Checks if a property is defined on the json schema.
-     * Currently, not working for object lists and optional schemas
-     *
-     * @param schema      schema that is checked
-     * @param jsonPointer path to property
-     * @return if property is defined
-     */
-    public boolean definesProperty(final Map<String, Object> schema, final String jsonPointer) {
-        final Schema schemaObj = this.createSchema(new JSONObject(schema));
-        return this.definesProperty(schemaObj, jsonPointer);
-    }
-
-    /**
-     * Checks if a property is defined on the json schema.
-     * Currently not working for optional schemas
-     *
-     * @param schema      schema that is checked
-     * @param jsonPointer path to property
-     * @return if property is defined
-     */
-    public boolean definesProperty(final Schema schema, final String jsonPointer) {
-        return schema.definesProperty(jsonPointer);
-    }
-
-
-    /**
-     * Checks if a property is readonly on the json schema.
-     * Currently, not working for object lists and optional schemas
-     * Defines property should be checked first - otherwise returns false
-     *
-     * @param schema      schema that is checked
-     * @param jsonPointer path to property
-     * @return if property is defined
-     */
-    public boolean definesPropertyReadonly(final Map<String, Object> schema, final String jsonPointer) {
-        final Schema schemaObj = this.createSchema(new JSONObject(schema));
-        return this.definesPropertyReadonly(schemaObj, jsonPointer);
-    }
-
-    /**
-     * Checks if a property is readonly on the json schema.
-     * Currently, not working for object lists and optional schemas
-     * Defines property should be checked first - otherwise returns false
-     *
-     * @param schema      schema that is checked
-     * @param jsonPointer path to property
-     * @return if property is defined
-     */
-    public boolean definesPropertyReadonly(final Schema schema, final String jsonPointer) {
-        return schema.isReadOnlyProperty(jsonPointer);
-    }
 
     //------------------------------------- helper methods -------------------------------------//
 

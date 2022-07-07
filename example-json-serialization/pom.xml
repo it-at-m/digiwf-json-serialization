@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>example</artifactId>
-    <name>example</name>
+    <artifactId>example-json-serialization</artifactId>
+    <name>example-json-serialization</name>
 
     <parent>
         <groupId>io.muenchendigital.digiwf</groupId>
         <artifactId>digiwf-json-serialization-parent</artifactId>
-        <version>0.0.5</version>
+        <version>0.1.0</version>
     </parent>
 
     <dependencies>
